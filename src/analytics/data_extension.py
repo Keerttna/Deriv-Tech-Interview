@@ -1,6 +1,13 @@
 import random
 from datetime import datetime
 
+from datetime import timedelta
+from src.utils.helpers import (
+    generate_session_id,
+    generate_user_id,
+    iso_timestamp
+)
+
 from src.utils.file_io import load_json
 from src.utils.constants import (
     COUNTRIES,
@@ -122,3 +129,191 @@ def apply_friction_adjustments(
         "generated_errors": generated_errors,
         "latency_multiplier": latency_multiplier
     }
+
+def generate_synthetic_sessions(
+    target_sessions=600
+):
+    """
+    Generate synthetic onboarding sessions.
+    """
+
+    all_events = []
+
+    base_time = datetime.utcnow()
+
+    for session_index in range(target_sessions):
+
+        segment = choose_segment()
+
+        session_id = generate_session_id()
+
+        user_id = generate_user_id()
+
+        current_offset = random.randint(0, 5000)
+
+        converted = True
+
+        # --------------------------------------------------
+        # Walk through funnel stages
+        # --------------------------------------------------
+
+        for step in FUNNEL_STAGES:
+
+            # ----------------------------------------------
+            # Entry event
+            # ----------------------------------------------
+
+            all_events.append({
+                "session_id": session_id,
+                "user_id_anon": user_id,
+                "event": "page_view",
+                "step": step,
+                "ts": iso_timestamp(
+                    base_time,
+                    current_offset
+                ),
+                "country": segment["country"],
+                "device": segment["device"],
+                "lang": segment["lang"]
+            })
+
+            current_offset += random.randint(3, 15)
+
+            # ----------------------------------------------
+            # Conversion probability
+            # ----------------------------------------------
+
+            base_probability = BASE_STEP_CONVERSION[step]
+
+            friction_result = apply_friction_adjustments(
+                step=step,
+                segment=segment,
+                conversion_probability=base_probability
+            )
+
+            adjusted_probability = friction_result[
+                "conversion_probability"
+            ]
+
+            # ----------------------------------------------
+            # Generate errors
+            # ----------------------------------------------
+
+            for error in friction_result["generated_errors"]:
+
+                all_events.append({
+                    "session_id": session_id,
+                    "user_id_anon": user_id,
+                    "event": "form_validation_error",
+                    "step": step,
+                    "field": error["field"],
+                    "code": error["code"],
+                    "ts": iso_timestamp(
+                        base_time,
+                        current_offset
+                    )
+                })
+
+                current_offset += random.randint(2, 8)
+
+            # ----------------------------------------------
+            # Simulate KYC latency
+            # ----------------------------------------------
+
+            latency_multiplier = friction_result[
+                "latency_multiplier"
+            ]
+
+            current_offset += (
+                random.randint(10, 40)
+                * latency_multiplier
+            )
+
+            # ----------------------------------------------
+            # Determine conversion
+            # ----------------------------------------------
+
+            did_convert = (
+                random.random()
+                <= adjusted_probability
+            )
+
+            # ----------------------------------------------
+            # Exit condition
+            # ----------------------------------------------
+
+            if not did_convert:
+
+                converted = False
+
+                all_events.append({
+                    "session_id": session_id,
+                    "user_id_anon": user_id,
+                    "event": "session_end",
+                    "step": step,
+                    "ts": iso_timestamp(
+                        base_time,
+                        current_offset
+                    )
+                })
+
+                break
+
+            # ----------------------------------------------
+            # Successful progression event
+            # ----------------------------------------------
+
+            all_events.append({
+                "session_id": session_id,
+                "user_id_anon": user_id,
+                "event": "step_completed",
+                "step": step,
+                "ts": iso_timestamp(
+                    base_time,
+                    current_offset
+                )
+            })
+
+            current_offset += random.randint(5, 20)
+
+        # --------------------------------------------------
+        # Successful full funnel completion
+        # --------------------------------------------------
+
+        if converted:
+
+            all_events.append({
+                "session_id": session_id,
+                "user_id_anon": user_id,
+                "event": "conversion",
+                "step": "first_trade",
+                "ts": iso_timestamp(
+                    base_time,
+                    current_offset
+                )
+            })
+
+    return all_events
+
+def extend_dataset():
+
+    seed_events = load_events()
+
+    synthetic_events = generate_synthetic_sessions(
+        target_sessions=600
+    )
+
+    combined_events = (
+        seed_events
+        + synthetic_events
+    )
+
+    combined_events = sorted(
+        combined_events,
+        key=lambda x: (
+            x["session_id"],
+            x["ts"]
+        )
+    )
+
+    return combined_events

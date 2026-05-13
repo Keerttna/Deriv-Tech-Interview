@@ -1,0 +1,50 @@
+[
+  {
+    "session_id": "ss_0001",
+    "user_id_anon": "u_aaa",
+    "event": "page_view",
+    "step": "landing",
+    "ts": "2025-09-01T08:00:01Z",
+    "country": "BR",
+    "device": "mobile_android",
+    "lang": "pt-BR"
+  },
+  {
+    "session_id": "ss_0001",
+    "user_id_anon": "u_aaa",
+    "event": "click_signup",
+    "step": "landing",
+    "ts": "2025-09-01T08:00:14Z"
+  },
+  {
+    "session_id": "ss_0001",
+    "user_id_anon": "u_aaa",
+    "event": "page_view",
+    "step": "signup_form",
+    "ts": "2025-09-01T08:00:15Z"
+  },
+  {
+    "session_id": "ss_0001",
+    "user_id_anon": "u_aaa",
+    "event": "form_field_focus",
+    "step": "signup_form",
+    "field": "email",
+    "ts": "2025-09-01T08:00:18Z"
+  },
+  {
+    "session_id": "ss_0001",
+    "user_id_anon": "u_aaa",
+    "event": "form_validation_error",
+    "step": "signup_form",
+    "field": "phone",
+    "code": "invalid_country_code",
+    "ts": "2025-09-01T08:00:42Z"
+  },
+  {
+    "session_id": "ss_0001",
+    "user_id_anon": "u_aaa",
+    "event": "session_end",
+    "step": "signup_form",
+    "ts": "2025-09-01T08:00:55Z"
+  }
+]
