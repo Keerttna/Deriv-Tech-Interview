@@ -8,6 +8,10 @@ from src.analytics.session_reconstruction import (
 
 from src.utils.file_io import save_json
 
+from src.analytics.funnel_metrics import (
+    compute_funnel_metrics
+)
+
 
 def run_pipeline():
 
@@ -49,4 +53,25 @@ def run_pipeline():
         f"Reconstructed {len(sessions)} sessions"
     )
 
-    print("\n=== PHASE 2 COMPLETE ===\n")
+        # --------------------------------------------------
+    # Funnel aggregation
+    # --------------------------------------------------
+
+    print(
+        "\nComputing funnel metrics..."
+    )
+
+    funnel_metrics = (
+        compute_funnel_metrics(
+            sessions
+        )
+    )
+
+    save_json(
+        funnel_metrics,
+        "outputs/funnel.json"
+    )
+
+    print(
+        "Generated funnel.json"
+    )
