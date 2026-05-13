@@ -16,6 +16,10 @@ from src.analytics.segment_metrics import (
     compute_segment_metrics
 )
 
+from src.analytics.trace_sampling import (
+    sample_representative_traces
+)
+
 
 def run_pipeline():
 
@@ -101,4 +105,29 @@ def run_pipeline():
 
     print(
         "Generated segments.json"
+    )
+
+        # --------------------------------------------------
+    # Trace sampling
+    # --------------------------------------------------
+
+    print(
+        "\nSampling representative traces..."
+    )
+
+    sampled_traces = (
+        sample_representative_traces(
+            sessions
+        )
+    )
+
+    save_json(
+        sampled_traces,
+        "outputs/sampled_traces.json"
+    )
+
+    print(
+        f"Generated "
+        f"{len(sampled_traces)} "
+        f"sampled traces"
     )
