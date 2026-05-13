@@ -12,6 +12,10 @@ from src.analytics.funnel_metrics import (
     compute_funnel_metrics
 )
 
+from src.analytics.segment_metrics import (
+    compute_segment_metrics
+)
+
 
 def run_pipeline():
 
@@ -74,4 +78,27 @@ def run_pipeline():
 
     print(
         "Generated funnel.json"
+    )
+
+        # --------------------------------------------------
+    # Segment aggregation
+    # --------------------------------------------------
+
+    print(
+        "\nComputing segment metrics..."
+    )
+
+    segment_metrics = (
+        compute_segment_metrics(
+            sessions
+        )
+    )
+
+    save_json(
+        segment_metrics,
+        "outputs/segments.json"
+    )
+
+    print(
+        "Generated segments.json"
     )
